@@ -20,6 +20,10 @@ jobs:
           python-version: '3.11'
       - name: Install public Google Drive downloader
         run: python -m pip install --disable-pip-version-check "gdown>=5,<6"
+      - name: Install FFmpeg for video encoding
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
       - name: Download and optimize seven public collaboration films
         run: |
           mkdir -p videos posters
