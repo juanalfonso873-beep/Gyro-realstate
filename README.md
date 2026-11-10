@@ -1,17 +1,31 @@
 # GYRO / Real Estate Films
 
-Propuesta audiovisual y portafolio cinematográfico para proyectos inmobiliarios.
+**Mostramos cómo se siente.**
 
-## Sitio
+Landing comercial para presentar producción audiovisual inmobiliaria de GYRO, con siete películas realizadas en colaboración con GILSA.
 
-`index.html` es una página estática compatible con GitHub Pages. Las tres películas destacadas —Origen, Encuentro y Materia— se reproducen desde los archivos compartidos de Google Drive y requieren permisos públicos de visualización.
+## Películas
+
+Origen · Encuentro · Materia · Umbral · Descanso · Pausa · Refugio
+
+Cada película se abre dentro de un visor integrado. La galería se puede deslizar con el dedo, trackpad o flechas, y el visor permite avanzar entre películas. Los archivos fuente se reproducen individualmente desde Google Drive con permiso "Cualquier persona con el enlace: lector"; no hay enlaces a la carpeta compartida en la web.
+
+## Servicios
+
+- **Property Film:** película principal con acento cinematográfico de una propiedad.
+- **Reels & Stories:** videos cortos para redes sociales, 15 segundos aprox.
+- **Content Collection:** producción mensual completa con piezas cortas de 15 segundos y largas de 45–60 segundos.
+
+## Contacto
+
+Alfonso Manrique · WhatsApp: +52 81 3448 0481.
 
 ## Publicación
 
-En GitHub: Settings → Pages → Build and deployment → Deploy from a branch → main → /(root) → Save.
+GitHub Pages: `main` / `(root)`.
 
-Sitio previsto: https://juanalfonso873-beep.github.io/Gyro-realstate/
+https://juanalfonso873-beep.github.io/Gyro-realstate/
 
-## Actualizaciones
+## Tecnología
 
-Editar `index.html` para cambiar textos, enlaces, proyectos y estilos.
+HTML, CSS y JavaScript. Sitio de una sola página responsive, sin frameworks ni compilación.
