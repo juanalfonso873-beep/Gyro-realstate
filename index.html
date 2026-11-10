@@ -97,16 +97,16 @@
     .person{margin-top:20px;font-size:12px;color:#746d63}
     footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px;padding:30px var(--site-pad);font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}
     footer strong{color:var(--paper);font-size:20px;letter-spacing:-.07em}
-    .viewer{padding:0;border:0;margin:auto;max-width:none;max-height:none;width:100vw;height:100dvh;background:#10100f;color:var(--paper)}
-    .viewer::backdrop{background:#080808}
-    .viewer[open]{display:grid;grid-template-rows:auto 1fr auto}
+    .viewer{padding:0;border:1px solid var(--rule);margin:auto;width:min(96vw,1100px);max-width:1100px;max-height:calc(100dvh - 24px);height:auto;overflow:auto;background:#10100f;color:var(--paper);border-radius:4px}
+    .viewer::backdrop{background:rgba(0,0,0,.88)}
+    .viewer[open]{display:grid;grid-template-rows:auto auto auto}
     .viewer-top{min-height:72px;display:flex;align-items:center;justify-content:space-between;padding:12px clamp(17px,3.5vw,48px);border-bottom:1px solid var(--rule);gap:20px}
     .viewer-mark{font-weight:900;font-size:24px;letter-spacing:-.08em}
     .viewer-label{font-size:10px;letter-spacing:.18em;color:var(--muted)}
     .viewer-close{width:43px;height:43px;border:1px solid var(--rule);border-radius:50%;background:transparent;color:var(--paper);font-size:25px;cursor:pointer}
-    .viewer-center{min-height:0;display:flex;justify-content:center;align-items:center;padding:12px 2.5vw}
-    .viewer-frame{width:min(100%,1320px);aspect-ratio:16/9;background:#030303;position:relative}
-    .viewer-frame iframe{display:block;width:100%;height:100%;border:0;background:#000}
+    .viewer-center{min-height:0;display:flex;justify-content:center;align-items:center;padding:0;background:#000}
+    .viewer-frame{width:min(100%,calc((100dvh - 208px)*16/9));aspect-ratio:16/9;background:#030303;position:relative;overflow:hidden}
+    .viewer-frame iframe,.viewer-frame video{display:block;width:100%;height:100%;border:0;background:#000;object-fit:contain}
     .viewer-bottom{padding:16px clamp(17px,3.5vw,48px) max(20px,env(safe-area-inset-bottom));border-top:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;gap:20px}
     .viewer-current{display:flex;flex-direction:column;gap:7px}
     .viewer-current strong{font-size:clamp(26px,3.3vw,45px);font-weight:400;letter-spacing:-.05em}
@@ -257,7 +257,7 @@
       <button type="button" class="viewer-close" id="closeViewer" aria-label="Cerrar reproductor">×</button>
     </div>
     <div class="viewer-center" id="viewerCenter">
-      <div class="viewer-frame"><iframe id="filmFrame" src="about:blank" title="Película GYRO" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+      <div class="viewer-frame"><video id="nativePlayer" controls playsinline webkit-playsinline preload="none" controlsList="nodownload noplaybackrate" aria-label="Película GYRO"></video><iframe id="filmFrame" src="about:blank" title="Película GYRO" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="display:none"></iframe></div>
     </div>
     <div class="viewer-bottom">
       <div class="viewer-current"><strong id="viewerTitle">ORIGEN</strong><span id="viewerCount">01 / 07 · GYRO × GILSA</span></div>
@@ -272,6 +272,7 @@
   const films=[{"name":"ORIGEN","id":"15OiFeJc5G5HZIePGEuM54toj7Yr7sHEf","time":"00:40"},{"name":"ENCUENTRO","id":"15DddVSw4GiBGptsxCVUQB8xtod9h0O3Y","time":"00:40"},{"name":"MATERIA","id":"1pQNYEaFl75Bfvrq2ZxqUBdnahMhjZe87","time":"00:35"},{"name":"UMBRAL","id":"1cQarjV_axRQOOm0ngkcY3800sXnLPnO0","time":"00:32"},{"name":"DESCANSO","id":"1rxizq9h24S2kcTYtDffI3Htb5mECeX_d","time":"00:35"},{"name":"PAUSA","id":"1fVhDkMQDqVucUilC8mkx9fJ9Uh-KDnxE","time":"00:39"},{"name":"REFUGIO","id":"1fX-01Gh1hp0-Mpblayq6cTWunjVnssaD","time":"00:41"}];
   const viewer=document.getElementById('filmViewer');
   const frame=document.getElementById('filmFrame');
+  const nativePlayer=document.getElementById('nativePlayer');
   const cards=[...document.querySelectorAll('.film-card')];
   const rail=document.getElementById('filmRail');
   const dots=[...document.querySelectorAll('.track-dot')];
@@ -298,17 +299,44 @@
       setSlide(closest);
     });
   },{passive:true});
+  function useDriveFallback(){
+    if(!viewer.open) return;
+    nativePlayer.pause();
+    nativePlayer.removeAttribute('src');
+    nativePlayer.load();
+    nativePlayer.style.display='none';
+    frame.style.display='block';
+    frame.src='https://drive.google.com/file/d/'+encodeURIComponent(films[activeFilm].id)+'/preview';
+  }
+  nativePlayer.addEventListener('error',function(){
+    if(nativePlayer.getAttribute('src')) useDriveFallback();
+  });
   function playFilm(index){
     activeFilm=(index+films.length)%films.length;
     const p=films[activeFilm];
     document.getElementById('viewerTitle').textContent=p.name;
     document.getElementById('viewerCount').textContent=String(activeFilm+1).padStart(2,'0')+' / 07 · GYRO × GILSA';
-    frame.title='Película '+p.name+' de GYRO en colaboración con GILSA';
-    frame.src='https://drive.google.com/file/d/'+encodeURIComponent(p.id)+'/preview';
-    if(!viewer.open){lastFocus=document.activeElement;viewer.showModal();}
+    nativePlayer.setAttribute('aria-label','Película '+p.name+' de GYRO en colaboración con GILSA');
+    frame.src='about:blank';
+    frame.style.display='none';
+    nativePlayer.pause();
+    nativePlayer.removeAttribute('src');
+    nativePlayer.load();
+    nativePlayer.style.display='block';
+    nativePlayer.poster='https://drive.google.com/thumbnail?id='+encodeURIComponent(p.id)+'&sz=w1600';
+    nativePlayer.src='videos/'+p.name.toLowerCase()+'.mp4';
+    if(!viewer.open){
+      lastFocus=document.activeElement;
+      viewer.showModal();
+    }
+    const playback=nativePlayer.play();
+    if(playback && typeof playback.catch==='function') playback.catch(function(){});
   }
   function closeFilm(){
     if(viewer.open)viewer.close();
+    nativePlayer.pause();
+    nativePlayer.removeAttribute('src');
+    nativePlayer.load();
     frame.src='about:blank';
     if(lastFocus && typeof lastFocus.focus==='function')lastFocus.focus();
   }
@@ -316,7 +344,7 @@
   document.getElementById('closeViewer').addEventListener('click',closeFilm);
   document.getElementById('nextFilm').addEventListener('click',function(){playFilm(activeFilm+1)});
   document.getElementById('prevFilm').addEventListener('click',function(){playFilm(activeFilm-1)});
-  viewer.addEventListener('cancel',function(){frame.src='about:blank';});
+  viewer.addEventListener('cancel',function(){nativePlayer.pause();nativePlayer.removeAttribute('src');nativePlayer.load();frame.src='about:blank';});
   document.addEventListener('keydown',function(e){
     if(!viewer.open)return;
     if(e.key==='ArrowRight'){e.preventDefault();playFilm(activeFilm+1)}
